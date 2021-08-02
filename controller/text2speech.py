@@ -10,7 +10,7 @@ from ibm_watson.websocket import SynthesizeCallback
 import pyaudio
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
-authenticator = IAMAuthenticator('api key')
+authenticator = IAMAuthenticator('mjmwxDNMSQ0E1lh0Ucivl5yRdI3471IZniPqJ2qVaAD9')
 service = TextToSpeechV1(authenticator=authenticator)
 #service.set_service_url('https://api.us-south.text-to-speech.watson.cloud.ibm.com/instances/9572ac68-de44-453e-9e52-906fa128b542')
 
