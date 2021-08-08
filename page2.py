@@ -1,11 +1,5 @@
-# You need to install pyaudio to run this example
-# pip install pyaudio
-
-# When using a microphone, the AudioSource `input` parameter would be
-# initialised as a queue. The pyaudio stream would be continuosly adding
-# recordings to the queue, and the websocket client would be sending the
-# recordings to the speech to text service
-
+import tkinter as tk
+from tkinter import StringVar, Text
 import pyaudio
 from ibm_watson import SpeechToTextV1
 from ibm_watson.websocket import RecognizeCallback, AudioSource
@@ -16,7 +10,6 @@ try:
     from Queue import Queue, Full
 except ImportError:
     from queue import Queue, Full
-
 ###############################################
 #### Initalize queue to store the recordings ##
 ###############################################
@@ -30,15 +23,13 @@ q = Queue(maxsize=int(round(BUF_MAX_SIZE / CHUNK)))
 # Create an instance of AudioSource
 audio_source = AudioSource(q, True, True)
 
-###############################################
-#### Prepare Speech to Text Service ########
-###############################################
-
 # initialize speech to text service
 authenticator = IAMAuthenticator('v_cHDfc_ZfCoZkLL8CXiWajXK9sv3h_ReT6aihbC52bV')
 speech_to_text = SpeechToTextV1(authenticator=authenticator)
 
-# define callback for the speech to text service
+texto_recognized = []
+texto = ''
+
 class MyRecognizeCallback(RecognizeCallback):
     def __init__(self):
         RecognizeCallback.__init__(self)
@@ -63,18 +54,19 @@ class MyRecognizeCallback(RecognizeCallback):
 
     def on_data(self, data):
         print(data)
+        texto_recognized.append(data['results'][0]['alternatives'][0]['transcript'])
 
     def on_close(self):
         print("Connection closed")
 
 # this function will initiate the recognize service and pass in the AudioSource
 def recognize_using_weboscket(*args):
-    mycallback = MyRecognizeCallback()
-    speech_to_text.recognize_using_websocket(audio=audio_source,
-                                             content_type='audio/l16; rate=44100',
-                                             recognize_callback=mycallback,
-                                             model='pt-BR_BroadbandModel',
-                                             interim_results=True)
+  mycallback = MyRecognizeCallback()
+  speech_to_text.recognize_using_websocket(audio=audio_source,
+                                            content_type='audio/l16; rate=44100',
+                                            recognize_callback=mycallback,
+                                            model='pt-BR_BroadbandModel',
+                                            interim_results=True)
 
 ###############################################
 #### Prepare the for recording using Pyaudio ##
@@ -95,7 +87,6 @@ def pyaudio_callback(in_data, frame_count, time_info, status):
 
 # instantiate pyaudio
 audio = pyaudio.PyAudio()
-
 # open stream using callback
 stream = audio.open(
     format=FORMAT,
@@ -107,22 +98,55 @@ stream = audio.open(
     start=False
 )
 
-#########################################################################
-#### Start the recording and start service to recognize the stream ######
-#########################################################################
-
-print("Enter CTRL+C to end recording...")
-stream.start_stream()
-
-try:
-    recognize_thread = Thread(target=recognize_using_weboscket, args=())
-    recognize_thread.start()
-
-    while True:
-        pass
-except KeyboardInterrupt:
-    # stop recording
+recognize_thread = Thread(target=recognize_using_weboscket, args=())
+def gravar():
+  #########################################################################
+  #### Start the recording and start service to recognize the stream ######
+  #########################################################################
+  stream.start_stream()
+  recognize_thread.start()
+def pararGravacao():
     stream.stop_stream()
-    stream.close()
+    # stream.close()
     audio.terminate()
     audio_source.completed_recording()
+    texto = " ".join(str(x) for x in texto_recognized)
+    print(f' o texto reconhecido>>>>>> {texto} >>>>>>')
+    novo.set(texto)
+
+
+
+ws = tk.Tk()
+ws.geometry('400x300')
+ws.title('Speech to text')
+ws['bg']='#ffd49d'
+
+textRecognized = tk.StringVar()
+f = ("Times bold", 14)
+novo = tk.StringVar()
+novo.set("")
+
+def prevPage():
+    ws.destroy()
+    import __main__
+
+
+texto_novo = tk.Label(ws, textvariable=novo,font=f, height=10, width=40,background="#FFFFFF").pack(expand=True, fill="x")
+
+buttonframe = tk.Frame(ws)
+buttonframe.pack(side="top")
+
+
+bgravar = tk.Button(buttonframe, text="Iniciar Gravação", font=f,command= gravar)
+bgravar.pack(side="left", fill='x')
+
+bparar = tk.Button(buttonframe, text="Parar Gravação", font=f, command= pararGravacao)
+bparar.pack(side="left", fill='x')
+
+
+
+buttonframe1 = tk.Frame(ws)
+buttonframe1.pack(side="bottom")
+b1 = tk.Button(buttonframe1, text="Inicio", font=f, command=prevPage).pack(
+    fill="x", expand=True, side="left")
+ws.mainloop()

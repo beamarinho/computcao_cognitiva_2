@@ -1,39 +1,53 @@
-from pages.Page import  Page
-from pages.TextPage import TxtToSpeech
-from pages.AudioPage import SpeechToTxt
-import tkinter as tk
+from tkinter import *
 
-class Principal(Page):
-  def __init__(self, *args, **kwargs):
-      Page.__init__(self,*args, **kwargs)
-      label = tk.Label(self, text="Computação Cognitiva 2")
-      label.pack(side="top", fill="both", expand= True)
-class MainView(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        tk.Frame.__init__(self, *args, **kwargs)
-        f = ("Times bold", 12) 
-        p1 = Principal(self)
-        p2 = SpeechToTxt(self)
-        p3 = TxtToSpeech(self)
 
-        buttonframe = tk.Frame(self)
-        container = tk.Frame(self)
-        buttonframe.pack(side="bottom", expand=False)
-        container.pack(side="top", fill="both", expand=True)
+ws = Tk()
+ws.geometry('400x300')
+ws.title('Computação Cognitiva 2')
+ws['bg'] = '#ffffff'
 
-        p1.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
-        p2.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
-        p3.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
+f = ("Times bold", 14)
 
-        b2 = tk.Button(buttonframe, text="Text to Speech", font=f,padx=10, pady=10, command=p2.show)
-        b3 = tk.Button(buttonframe, text="Speech to Text",  font=f,padx=10, pady=10 ,command=p3.show)
 
-        b2.pack(side="left",fill='x')
-        b3.pack(side="right",fill='x') 
+def text2speech():
+    ws.destroy()
+    import page1
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    main = MainView(root)
-    main.pack(side="top", fill="both", expand=True)
-    root.wm_geometry("400x400")
-    root.mainloop()
+
+def speech2text():
+    ws.destroy()
+    import page2
+
+
+Label(
+    ws,
+    text="Escolha uma opção",
+    padx=20,
+    pady=20,
+    bg='#ffffff',
+    font=f
+).pack(expand=True, fill=BOTH)
+
+Button(
+    ws,
+    text="Text to Speech",
+    font=f,
+    command=text2speech
+).pack(fill=X, expand=TRUE, side=LEFT)
+
+Button(
+    ws,
+    text="Speech to text",
+    font=f,
+    command=speech2text
+).pack(fill=X, expand=TRUE, side=LEFT)
+
+ws.mainloop()
+
+
+# if __name__ == "__main__":
+#     ws = tk.Tk()
+#     main = MainView(root)
+#     main.pack(side="top", fill="both", expand=True)
+#     root.wm_geometry("400x400")
+#     root.mainloop()
